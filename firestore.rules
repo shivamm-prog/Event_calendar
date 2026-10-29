@@ -1,0 +1,75 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null && request.auth.uid != null;
+    }
+
+    function userDocExists() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isCoreTeam() {
+      return isSignedIn() && userDocExists() && getUserData().role == 'core_team';
+    }
+
+    function isBOD() {
+      return isSignedIn() && userDocExists() && getUserData().role == 'bod';
+    }
+
+    function getAssignedAvenue() {
+      return getUserData().assignedAvenue;
+    }
+
+    // 1. Users collection: Roles and assigned avenues
+    match /users/{userId} {
+      // Any signed-in club member can read user profiles to verify permissions and view roster
+      allow read: if isSignedIn();
+
+      // Any authenticated user can create their initial profile document for their own uid.
+      // Once created, roles and assigned avenues can only be updated or deleted by Core Team administrators.
+      allow create: if isSignedIn() && request.auth.uid == userId;
+
+      // Only Core Team administrators can update or delete user roles and avenue assignments
+      allow update: if isCoreTeam();
+      allow delete: if isCoreTeam();
+    }
+
+    // 2. Events collection: Role and Avenue-based event management
+    match /events/{eventId} {
+      // All authorized club members can view all club events
+      allow read: if isSignedIn();
+
+      // Create: Core Team can create for any avenue; BOD can only create for their assigned avenue
+      allow create: if isCoreTeam() || (
+        isBOD() &&
+        request.resource.data.avenue == getAssignedAvenue()
+      );
+
+      // Update: Core Team can edit any event; BOD can only edit events belonging to their assigned avenue
+      // and cannot change the event's avenue to a different one
+      allow update: if isCoreTeam() || (
+        isBOD() &&
+        resource.data.avenue == getAssignedAvenue() &&
+        request.resource.data.avenue == getAssignedAvenue()
+      );
+
+      // Delete: Core Team can delete any event; BOD can only delete events in their assigned avenue
+      allow delete: if isCoreTeam() || (
+        isBOD() &&
+        resource.data.avenue == getAssignedAvenue()
+      );
+    }
+
+    // 3. Settings collection: Configured avenue lists and club configurations
+    match /settings/{settingId} {
+      allow read: if isSignedIn();
+      allow write: if isCoreTeam();
+    }
+  }
+}

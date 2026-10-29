@@ -1,0 +1,6 @@
+{
+  "name": "Rotaract Club of RSCOE — Event Management System",
+  "description": "Comprehensive event scheduling, management, reporting, and tracking platform for the Rotaract Club of Rajarshi Shahu College of Engineering (RSCOE), Tathawade.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,85 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User account role and avenue assignment in Rotaract Club of RSCOE",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "description": "Club member email" },
+        "displayName": { "type": "string", "description": "Full name" },
+        "role": {
+          "type": "string",
+          "enum": ["core_team", "bod"],
+          "description": "Authorized role: core_team or bod"
+        },
+        "assignedAvenue": {
+          "type": "string",
+          "description": "Authorized avenue for BOD members"
+        },
+        "createdAt": { "type": "number", "description": "Timestamp created" },
+        "updatedAt": { "type": "number", "description": "Timestamp updated" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "RotaractEvent": {
+      "title": "RotaractEvent",
+      "description": "Official Rotaract RSCOE club event record",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Event title" },
+        "avenue": { "type": "string", "description": "Avenue of service" },
+        "status": {
+          "type": "string",
+          "enum": ["upcoming", "live", "past", "completed"],
+          "description": "Event status"
+        },
+        "date": { "type": "string", "description": "Date YYYY-MM-DD" },
+        "startTime": { "type": "string", "description": "Start time HH:MM" },
+        "endTime": { "type": "string", "description": "End time HH:MM" },
+        "venue": { "type": "string", "description": "Venue or platform location" },
+        "chairperson": { "type": "string", "description": "Project chairperson" },
+        "coChairperson": { "type": "string", "description": "Optional co-chair" },
+        "budget": { "type": "number", "description": "Estimated budget" },
+        "actualExpense": { "type": "number", "description": "Actual expense" },
+        "expectedAttendees": { "type": "number", "description": "Expected participants" },
+        "actualAttendees": { "type": "number", "description": "Actual participants" },
+        "description": { "type": "string", "description": "Event summary" },
+        "objectives": { "type": "string", "description": "Strategic goals" },
+        "registrationLink": { "type": "string", "description": "RSVP or form URL" },
+        "isFlagship": { "type": "boolean", "description": "Flagship project flag" },
+        "createdBy": { "type": "string", "description": "UID of creator" },
+        "createdAt": { "type": "number", "description": "Created timestamp" },
+        "updatedAt": { "type": "number", "description": "Updated timestamp" }
+      },
+      "required": ["title", "avenue", "status", "date", "venue", "chairperson"]
+    },
+    "ClubSettings": {
+      "title": "ClubSettings",
+      "description": "Configurable club settings such as authorized avenues",
+      "type": "object",
+      "properties": {
+        "avenues": {
+          "type": "array",
+          "description": "Configured avenues list"
+        },
+        "updatedBy": { "type": "string", "description": "UID of updater" },
+        "updatedAt": { "type": "number", "description": "Timestamp" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Authorized club user accounts with role and avenue assignments"
+    },
+    "/events/{eventId}": {
+      "schema": { "$ref": "#/entities/RotaractEvent" },
+      "description": "Shared organizational events for Rotaract Club of RSCOE"
+    },
+    "/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/ClubSettings" },
+      "description": "Configurable club settings and avenues"
+    }
+  }
+}
